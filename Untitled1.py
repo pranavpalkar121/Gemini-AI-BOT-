@@ -2,6 +2,7 @@
 # coding: utf-8
 
 # In[ ]:
+pip install google-generativeai
 
 
 import google.generativeai as genai
