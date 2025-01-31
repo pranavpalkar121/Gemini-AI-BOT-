@@ -8,7 +8,7 @@ pip install google-generativeai
 import google.generativeai as genai
 
 # Configure the Gemini API (Make sure you set up your API key)
-genai.configure(api_key="AIzaSyB0iGj0GDB9667QCnKiZC4XRUEoDCmnS60")
+genai.configure(api_key="API key ")
 
 # Initialize the model
 model = genai.GenerativeModel('gemini-pro')
