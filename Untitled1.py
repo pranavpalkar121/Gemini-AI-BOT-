@@ -1,47 +1,57 @@
-#!/usr/bin/env python
-# coding: utf-8
+import os
 
-# In[ ]:
-pip install google-generativeai
-
-
-import google.generativeai as genai
-
-# Configure the Gemini API (Make sure you set up your API key)
-genai.configure(api_key="API key ")
-
-# Initialize the model
-model = genai.GenerativeModel('gemini-pro')
-
-# Function to handle chat history
-def chat():
-    print("Welcome to AI Chatbot! Type 'exit' to end the chat.")
-    history = []  # Store chat history
-
-    while True:
-        user_input = input("You: ")
-        if user_input.lower() == 'exit':
-            print("Chatbot: Goodbye!")
-            break
-        
-        # Add user input to history
-        history.append({"role": "user", "parts": [user_input]})
-
-        # Generate response
-        response = model.generate_content(user_input)
-
-        # Store chatbot response in history
-        history.append({"role": "assistant", "parts": [response.text]})
-
-        print(f"Chatbot: {response.text}")
-
-# Run the chatbot
-if __name__ == "__main__":
-    chat()
+import streamlit as st
+from dotenv import load_dotenv
+import google.generativeai as gen_ai
 
 
-# In[ ]:
+# Load environment variables
+load_dotenv('untitled.env')
+
+# Configure Streamlit page settings
+st.set_page_config(
+    page_title="Chat with Gemini-Pro!",
+    page_icon=":brain:",  # Favicon emoji
+    layout="centered",  # Page layout option
+)
+
+GOOGLE_API_KEY = os.getenv("Gemini_API_KEY")
+
+# Set up Google Gemini-Pro AI model
+gen_ai.configure(api_key=GOOGLE_API_KEY)
+model = gen_ai.GenerativeModel('learnlm-1.5-pro-experimental')
 
 
+# Function to translate roles between Gemini-Pro and Streamlit terminology
+def translate_role_for_streamlit(user_role):
+    if user_role == "model":
+        return "assistant"
+    else:
+        return user_role
 
 
+# Initialize chat session in Streamlit if not already present
+if "chat_session" not in st.session_state:
+    st.session_state.chat_session = model.start_chat(history=[])
+
+
+# Display the chatbot's title on the page
+st.title("🤖 Gemini Pro - ChatBot")
+
+# Display the chat history
+for message in st.session_state.chat_session.history:
+    with st.chat_message(translate_role_for_streamlit(message.role)):
+        st.markdown(message.parts[0].text)
+
+# Input field for user's message
+user_prompt = st.chat_input("Ask me...")
+if user_prompt:
+    # Add user's message to chat and display it
+    st.chat_message("user").markdown(user_prompt)
+
+    # Send user's message to Gemini-Pro and get the response
+    gemini_response = st.session_state.chat_session.send_message(user_prompt)
+
+    # Display Gemini-Pro's response
+    with st.chat_message("assistant"):
+        st.markdown(gemini_response.text)
